@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управления NOLYM - Адаптивный Дашборд</title>
+    <style>
+        /* ==========================================================
+           1. ГЛОБАЛЬНЫЕ СТИЛИ И ПЕРЕМЕННЫЕ
+           ========================================================== */
+        :root {
+            --color-link-blue: #007bff;
+            --color-sidebar-bg: #fdfdfd; 
+            --color-main-bg: #eeeeee;     
+            --color-border-light: #dddddd;
+            --color-text-dark: #333333;
+            --color-nolym-active: #17b629; 
+            --color-ray-card-bg: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-main-bg);
+            color: var(--color-text-dark);
+            font-size: 14px;
+        }
+
+        a { text-decoration: none; }
+        .content-view { display: none; }
+        .content-view.active { display: block; }
+        
+        /* Общие стили для ссылок-кнопок в меню (как на скриншоте) */
+        .link-block {
+            display: inline-block;
+            background-color: #ecf3ff;
+            color: var(--color-link-blue);
+            padding: 7px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-align: center;
+            white-space: nowrap;
+            border: 1px solid #c7ddff;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            flex-grow: 1;
+        }
+        .link-block:hover { background-color: #d8e5ff; }
+
+        .active-nav {
+            background-color: var(--color-link-blue) !important;
+            color: white !important;
+            border-color: var(--color-link-blue) !important;
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+        }
+        
+        /* ==========================================================
+           2. ЭКРАН ВХОДА 
+           ========================================================== */
+        #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            background-image: linear-gradient(120deg, #fdfdff 0%, #ececec 100%);
+        }
+        .login-box {
+            padding: 40px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            background-color: white; width: 300px; text-align: center;
+        }
+        .login-box h2 { font-size: 1.8em; margin-bottom: 25px; }
+        .login-box .logo-accent { color: var(--color-nolym-active); }
+        .login-box button {
+            background-color: var(--color-link-blue); font-weight: 600;
+            padding: 10px 20px; border-radius: 4px; cursor: pointer;
+            width: 100%; box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+            border: none; color: white;
+        }
+
+        /* ==========================================================
+           3. ОСНОВНОЙ КОНТЕЙНЕР 
+           ========================================================== */
+        .main-container { display: flex; min-height: 100vh; }
+        
+        .sidebar {
+            width: 300px; min-width: 300px; background-color: var(--color-sidebar-bg);
+            border-right: 1px solid var(--color-border-light);
+            padding: 15px 0 20px 0; overflow-y: auto; flex-shrink: 0;
+        }
+
+        .section { padding: 15px; border-bottom: 1px solid #eee; }
+        .app-logo { font-size: 1.5em; font-weight: 700; }
+        .section-title { font-size: 0.9em; font-weight: 600; color: #6c757d; margin-bottom: 12px; }
+        .link-section-content { display: flex; flex-wrap: wrap; gap: 10px 5px; }
+
+        .main-content-area {
+            flex-grow: 1; padding: 30px; overflow-y: auto;
+        }
+
+        .dashboard-card {
+            background-color: var(--color-ray-card-bg);
+            padding: 25px; border-radius: 8px; box-shadow: var(--shadow-sm); margin-bottom: 25px;
+        }
+        
+        /* ---- ИЗМЕНЕНИЯ ЗДЕСЬ: ПРОМО-СЛАЙДЕР ---- */
+        .ray-main-promo {
+            /* УДАЛЕНИЕ СТАРОГО background-image */
+            height: 350px; 
+            position: relative; 
+            border-radius: 4px;
+            overflow: hidden; /* **Ключевой момент для слайдера** */
+        }
+        
+        /* Новые стили для контейнера слайдов (track) */
+        .slider-container {
+            display: flex;
+            height: 100%;
+            transition: transform 0.5s ease-in-out; /* Анимация сдвига */
+            /* Ширина (300% для 3 слайдов) будет установлена в JS */
+        }
+
+        /* Новые стили для каждого слайда */
+        .slide {
+            flex-basis: 100%; /* Каждый слайд занимает 100% ширины родителя (.ray-main-promo) */
+            flex-shrink: 0; /* Не даем слайдам сжиматься */
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        /* Стили для текста */
+        .ray-promo-text {
+            padding: 15px; color: white; font-size: 1.1em;
+            background-color: rgba(0, 0, 0, 0.7);
+            position: absolute; bottom: 0; right: 0;
+        }
+        
+        /* Стили для навигационных точек */
+        .slider-dots {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dot.active-dot {
+            background-color: white;
+            border: 1px solid white;
+        }
+        /* ------------------------------------------------ */
+
+        .card-grid {
+             display: grid;
+             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+             gap: 20px;
+        }
+        
+        /* ==========================================================
+           4. АДАПТИВНОСТЬ
+           ========================================================== */
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; }
+            .sidebar { width: 100%; min-width: 100%; border-right: none; border-bottom: 1px solid var(--color-border-light); }
+            .main-content-area { padding: 15px; }
+            .link-block { flex: 1 1 calc(50% - 5px); }
+            .card-grid { grid-template-columns: 1fr; gap: 15px; }
+            .ray-main-promo { height: 250px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ЭКРАН ВХОДА -->
+<div id="auth-overlay">
+    <div class="login-box">
+        <h2><span style="color: #6c757d;">Вход</span> <span class="logo-accent">NOLYM</span></h2>
+        <p>Панель управления интернет-магазином RAY</p>
+        <button onclick="simulateLogin()">Войти</button>
+    </div>
+</div>
+
+<!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+<div class="main-container" id="main-interface">
+    <aside class="sidebar">
+        
+        <div class="section" style="display: flex; justify-content: space-between; align-items: center; border-top: none;">
+            <span class="app-logo">Админ Панель</span>
+            <div class="tag-nolym" style="background-color: #d1f4d9; color: var(--color-nolym-active); font-size: 0.8em; font-weight: 600; padding: 4px 8px; border-radius: 12px;">NOLYM</div>
+        </div>
+
+        <div class="section"> <p>Интернет-магазин **RAY**</p> </div>
+
+        <div class="section link-area">
+            <h3 class="section-title">ГЛАВНОЕ МЕНЮ</h3>
+            <div class="link-section-content" style="flex-direction: column; gap: 5px;">
+                <a href="#" class="link-block active-nav" id="nav-dashboard" onclick="showPage('dashboard-view'); return false;" style="text-align: left; padding-left: 15px; padding-right: 15px; border-radius: 4px;"> Главный Дашборд</a>
+                <a href="#" class="link-block" id="nav-catalog" onclick="showPage('catalog-view'); return false;" style="text-align: left; padding-left: 15px; padding-right: 15px; border-radius: 4px;"> Каталог (Товары)</a>
+                <a href="#" class="link-block" id="nav-orders" onclick="showPage('orders-view'); return false;" style="text-align: left; padding-left: 15px; padding-right: 15px; border-radius: 4px;"> Заказы</a>
+                <a href="#" class="link-block" style="text-align: left; padding-left: 15px; padding-right: 15px; border-radius: 4px;"> Настройки Сайта</a>
+            </div>
+            
+            <h3 class="section-title" style="margin-top: 20px;">ТЕХНИЧЕСКИЕ ССЫЛКИ</h3>
+            <div class="link-section-content">
+                <a href="#" class="link-block">Редиректы</a>
+                <a href="#" class="link-block" style="background-color: #f7fffb; color: #008037; border: 1px solid #d5eedd;">Парсер</a>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3 class="section-title">КОНТАКТЫ</h3>
+            <div style="font-size: 1.1em; font-weight: 600;">Игорь Ежов</div>
+            <div style="font-size: 0.8em; color: #999;">Главный админ NOLYM</div>
+        </div>
+        
+    </aside>
+
+    <!-- ОСНОВНАЯ РАБОЧАЯ ОБЛАСТЬ (Динамический Контент) -->
+    <main class="main-content-area">
+
+        <!-- 1. DASHBOARD VIEW (ОКНО 1) -->
+        <div class="content-view active" id="dashboard-view">
+            <h1 style="font-size: 1.6em; margin-bottom: 25px;">Рабочий Стол / Обзор Статистики</h1>
+
+            <div class="dashboard-card" style="padding: 15px; border: 1px solid #e1e1e1;">
+                <h2 style="font-size: 1.4em; color: #555; margin: 0 0 15px 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Промо-элемент (Главное на сайте)</h2>
+                
+                 <!-- НОВАЯ СТРУКТУРА СЛАЙДЕРА -->
+                 <div class="ray-main-promo">
+                    <div class="slider-container" id="promo-slider">
+                        <!-- СЛАЙД 1 (Ваша ссылка) -->
+                        <div class="slide" style="background-image: url('https://tse2.mm.bing.net/th/id/OIP.7yFgvnuXdDuVGJPIOUeyqwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3');">
+                             <div class="ray-promo-text">🔥 Новое Промо! Стильный слайдер от RAY.</div>
+                        </div>
+                        <!-- СЛАЙД 2 (Старая ссылка) -->
+                        <div class="slide" style="background-image: url('https://tse1.mm.bing.net/th/id/OIP.YwZXc-67MOAtVJG1ts8CYwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3');">
+                             <div class="ray-promo-text">Подвесные светильники с медью: Стиль и минимализм в каждой линии.</div>
+                        </div>
+                        <!-- СЛАЙД 3 (Пример) -->
+                        <div class="slide" style="background-image: url('https://tse3.mm.bing.net/th/id/OIP.k5R00_d61R1m65Q4uW7VwQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3');">
+                             <div class="ray-promo-text">Третий Слайд: Больше Промо-Акций! Не пропустите.</div>
+                        </div>
+                    </div>
+                    <!-- Навигационные точки -->
+                    <div class="slider-dots" id="slider-dots-container"></div>
+                 </div>
+                 <!-- КОНЕЦ НОВОЙ СТРУКТУРЫ -->
+            </div>
+
+            <div class="dashboard-card">
+                 <h2 style="font-size: 1.4em; color: #555; margin: 0 0 15px 0;">Ключевые показатели</h2>
+                 <div class="card-grid">
+                     <!-- КАРТОЧКА: ПЕРЕЙТИ В ЗАКАЗЫ -->
+                     <a href="#" class="dashboard-card" onclick="showPage('orders-view'); return false;" style="background-color: #f5f5ff; padding: 20px; border-radius: 4px; border: 1px solid #d8e5ff; cursor: pointer;">
+                         <h3 style="margin: 0; font-size: 1.8em; color: var(--color-link-blue);">5</h3>
+                         <p style="margin: 5px 0 0 0; color: #666; font-weight: 600;">Необработанных заказов (Перейти)</p>
+                     </a>
+                     <!-- КАРТОЧКА: ПЕРЕЙТИ В КАТАЛОГ -->
+                     <a href="#" class="dashboard-card" onclick="showPage('catalog-view'); return false;" style="background-color: #f0fdf5; padding: 20px; border-radius: 4px; border: 1px solid #b7e0c4; cursor: pointer;">
+                          <h3 style="margin: 0; font-size: 1.8em; color: var(--color-nolym-active);">25</h3>
+                         <p style="margin: 5px 0 0 0; color: #666; font-weight: 600;">Позиций под проверку (Каталог)</p>
+                     </a>
+                     <div style="background-color: #fef4f4; padding: 20px; border-radius: 4px; border: 1px solid #fccfd1;">
+                          <h3 style="margin: 0; font-size: 1.8em; color: #e6626d;">88</h3>
+                         <p style="margin: 5px 0 0 0; color: #666;">Жалоб за последнюю неделю</p>
+                     </div>
+                 </div>
+            </div>
+        </div>
+
+        <!-- 2. CATALOG VIEW (ОКНО 2) -->
+        <div class="content-view" id="catalog-view">
+            <h1 style="font-size: 1.6em; margin-bottom: 25px;">Управление Каталогом Товаров</h1>
+            <div class="dashboard-card">
+                 <h2 style="font-size: 1.3em; margin: 0 0 15px 0;">Инструменты и Поиск</h2>
+                 <input type="text" placeholder="Поиск по Артикулу, Названию..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
+                 <a href="#" onclick="showPage('dashboard-view'); return false;" style="color: var(--color-link-blue); font-weight: 600;"> ← Назад на Главный Дашборд</a>
+            </div>
+        </div>
+
+        <!-- 3. ORDERS VIEW (ОКНО 3) -->
+         <div class="content-view" id="orders-view">
+             <h1 style="font-size: 1.6em; margin-bottom: 25px;">Список Входящих Заказов</h1>
+             <div class="dashboard-card">
+                 <h2 style="font-size: 1.3em; margin: 0 0 15px 0;">Необработанные заказы</h2>
+                 <a href="#" onclick="showPage('dashboard-view'); return false;" style="color: var(--color-link-blue); font-weight: 600;"> ← Назад на Главный Дашборд</a>
+            </div>
+         </div>
+
+    </main>
+</div>
+
+<script>
+    const mainInterface = document.getElementById('main-interface');
+    const authOverlay = document.getElementById('auth-overlay');
+    
+    // ==========================================================
+    // НОВЫЙ КОД ДЛЯ СЛАЙДЕРА
+    // ==========================================================
+    let currentSlide = 0;
+    const sliderContainer = document.getElementById('promo-slider');
+    const dotsContainer = document.getElementById('slider-dots-container');
+    const slides = document.querySelectorAll('.slide');
+    let slideInterval;
+    
+    // 1. Установка ширины контейнера и создание точек
+    function createDots() {
+        if (sliderContainer) {
+             // Устанавливаем общую ширину контейнера слайдов (N * 100% от родителя)
+             sliderContainer.style.width = `${slides.length * 100}%`;
+        }
+
+        slides.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (index === 0) {
+                dot.classList.add('active-dot');
+            }
+            dot.addEventListener('click', () => {
+                // Сбрасываем таймер при ручном переключении
+                resetAutoSlide(); 
+                goToSlide(index);
+            });
+            dotsContainer.appendChild(dot);
+        });
+    }
+    
+    // 2. Функция для перехода к конкретному слайду
+    function goToSlide(index) {
+        currentSlide = index;
+        if (sliderContainer) {
+             // Сдвигаем контейнер на (-индекс * 100%)
+             sliderContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+
+        // Обновляем активную точку
+        document.querySelectorAll('.dot').forEach((dot, idx) => {
+            dot.classList.remove('active-dot');
+            if (idx === currentSlide) {
+                dot.classList.add('active-dot');
+            }
+        });
+    }
+
+    // 3. Функции для автопрокрутки
+    function autoSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
+        goToSlide(currentSlide);
+    }
+    
+    function startAutoSlide() {
+        // Запускаем автопрокрутку (каждые 4 секунды)
+        slideInterval = setInterval(autoSlide, 4000); 
+    }
+    
+    function resetAutoSlide() {
+         clearInterval(slideInterval);
+         startAutoSlide();
+    }
+    
+    // 4. Инициализация слайдера
+    function initSlider() {
+        if (slides.length > 0 && sliderContainer && dotsContainer) {
+            createDots();
+            startAutoSlide();
+        }
+    }
+    // ==========================================================
+    // КОНЕЦ КОДА ДЛЯ СЛАЙДЕРА
+    // ==========================================================
+
+    // Функция 1: Вход в систему (уже привязана к кнопке "Войти")
+    function simulateLogin() {
+        authOverlay.style.opacity = '0';
+        authOverlay.style.transition = 'opacity 0.5s';
+        
+        setTimeout(() => {
+             authOverlay.style.display = 'none';
+             mainInterface.style.display = 'flex';
+             showPage('dashboard-view');
+             initSlider(); // <-- ЗАПУСК СЛАЙДЕРА ПОСЛЕ ВХОДА
+        }, 500);
+    }
+
+    // Функция 2: Переключение окон/разделов (привязана ко всем кнопкам навигации)
+    function showPage(pageId) {
+        // Скрываем все разделы контента
+        document.querySelectorAll('.content-view').forEach(view => {
+            view.classList.remove('active');
+        });
+        
+        // Удаляем активный стиль со всех ссылок в меню
+        document.querySelectorAll('.link-block').forEach(link => link.classList.remove('active-nav'));
+
+        // Показываем нужный раздел
+        const targetView = document.getElementById(pageId);
+        if (targetView) {
+            targetView.classList.add('active');
+        }
+        
+        // Активируем соответствующую ссылку в меню (если она есть)
+        const navLink = document.getElementById(`nav-${pageId.replace('-view', '')}`);
+        if (navLink) {
+             navLink.classList.add('active-nav');
+        }
+    }
+
+    // Инициализация при открытии
+    mainInterface.style.display = 'none';
+    authOverlay.style.display = 'flex'; 
+
+</script>
+
+</body>
+</html>
