@@ -10,11 +10,11 @@
            ========================================================== */
         :root {
             --color-link-blue: #007bff;
-            --color-sidebar-bg: #fdfdfd; 
-            --color-main-bg: #eeeeee;     
+            --color-sidebar-bg: #fdfdfd; /* Цвет фона боковой панели */
+            --color-main-bg: #eeeeee;     /* Цвет фона основной области */
             --color-border-light: #dddddd;
             --color-text-dark: #333333;
-            --color-nolym-active: #17b629; 
+            --color-nolym-active: #17b629; /* Акцентный цвет NOLYM */
             --color-ray-card-bg: #ffffff;
             --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
@@ -29,10 +29,10 @@
         }
 
         a { text-decoration: none; }
-        .content-view { display: none; }
-        .content-view.active { display: block; }
+        .content-view { display: none; } /* Скрытие неактивных контентных блоков */
+        .content-view.active { display: block; } /* Отображение активного контентного блока */
         
-        /* Общие стили для ссылок-кнопок в меню (как на скриншоте) */
+        /* Общие стили для ссылок-кнопок в меню */
         .link-block {
             display: inline-block;
             background-color: #ecf3ff;
@@ -50,7 +50,7 @@
         }
         .link-block:hover { background-color: #d8e5ff; }
 
-        .active-nav {
+        .active-nav { /* Стиль активного элемента навигации */
             background-color: var(--color-link-blue) !important;
             color: white !important;
             border-color: var(--color-link-blue) !important;
@@ -79,11 +79,11 @@
         }
 
         /* ==========================================================
-           3. ОСНОВНОЙ КОНТЕЙНЕР 
+           3. ОСНОВНОЙ КОНТЕЙНЕР (Сайдбар и Контент)
            ========================================================== */
         .main-container { display: flex; min-height: 100vh; }
         
-        .sidebar {
+        .sidebar { /* Боковая панель */
             width: 300px; min-width: 300px; background-color: var(--color-sidebar-bg);
             border-right: 1px solid var(--color-border-light);
             padding: 15px 0 20px 0; overflow-y: auto; flex-shrink: 0;
@@ -94,7 +94,7 @@
         .section-title { font-size: 0.9em; font-weight: 600; color: #6c757d; margin-bottom: 12px; }
         .link-section-content { display: flex; flex-wrap: wrap; gap: 10px 5px; }
 
-        .main-content-area {
+        .main-content-area { /* Область основного контента */
             flex-grow: 1; padding: 30px; overflow-y: auto;
         }
 
@@ -103,42 +103,36 @@
             padding: 25px; border-radius: 8px; box-shadow: var(--shadow-sm); margin-bottom: 25px;
         }
         
-        /* ---- ИЗМЕНЕНИЯ ЗДЕСЬ: ПРОМО-СЛАЙДЕР ---- */
+        /* ---- СТИЛИ ДЛЯ СЛАЙДЕРА ---- */
         .ray-main-promo {
-            /* УДАЛЕНИЕ СТАРОГО background-image */
             height: 350px; 
             position: relative; 
             border-radius: 4px;
-            overflow: hidden; /* **Ключевой момент для слайдера** */
+            overflow: hidden; /* Обрезка слайдов, выходящих за границы */
         }
         
-        /* Новые стили для контейнера слайдов (track) */
-        .slider-container {
+        .slider-container { /* Контейнер для всех слайдов (лента) */
             display: flex;
             height: 100%;
             transition: transform 0.5s ease-in-out; /* Анимация сдвига */
-            /* Ширина (300% для 3 слайдов) будет установлена в JS */
         }
 
-        /* Новые стили для каждого слайда */
-        .slide {
-            flex-basis: 100%; /* Каждый слайд занимает 100% ширины родителя (.ray-main-promo) */
-            flex-shrink: 0; /* Не даем слайдам сжиматься */
+        .slide { /* Отдельный слайд */
+            flex-basis: 100%; 
+            flex-shrink: 0; 
             height: 100%;
             background-size: cover;
             background-position: center;
             position: relative;
         }
         
-        /* Стили для текста */
-        .ray-promo-text {
+        .ray-promo-text { /* Текст на промо-слайде */
             padding: 15px; color: white; font-size: 1.1em;
             background-color: rgba(0, 0, 0, 0.7);
             position: absolute; bottom: 0; right: 0;
         }
         
-        /* Стили для навигационных точек */
-        .slider-dots {
+        .slider-dots { /* Контейнер для навигационных точек */
             position: absolute;
             bottom: 15px;
             left: 50%;
@@ -148,7 +142,7 @@
             gap: 8px;
         }
 
-        .dot {
+        .dot { /* Отдельная точка-индикатор */
             width: 10px;
             height: 10px;
             background-color: rgba(255, 255, 255, 0.5);
@@ -158,11 +152,20 @@
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
-        .dot.active-dot {
+        .dot.active-dot { /* Активная точка */
             background-color: white;
             border: 1px solid white;
         }
-        /* ------------------------------------------------ */
+        /* --------------------------- */
+        
+        /* Стили для iframe/WebView */
+        .webview-container {
+            border: 1px solid var(--color-border-light);
+            border-radius: 4px;
+            overflow: hidden;
+            height: 600px; /* Высота для демонстрации iframe */
+            margin-top: 15px;
+        }
 
         .card-grid {
              display: grid;
@@ -180,6 +183,7 @@
             .link-block { flex: 1 1 calc(50% - 5px); }
             .card-grid { grid-template-columns: 1fr; gap: 15px; }
             .ray-main-promo { height: 250px; }
+            .webview-container { height: 400px; }
         }
     </style>
 </head>
@@ -237,9 +241,8 @@
             <h1 style="font-size: 1.6em; margin-bottom: 25px;">Рабочий Стол / Обзор Статистики</h1>
 
             <div class="dashboard-card" style="padding: 15px; border: 1px solid #e1e1e1;">
-                <h2 style="font-size: 1.4em; color: #555; margin: 0 0 15px 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Промо-элемент (Главное на сайте)</h2>
+                <h2 style="font-size: 1.4em; color: #555; margin: 0 0 15px 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Промо-элемент (Слайдер)</h2>
                 
-                 <!-- НОВАЯ СТРУКТУРА СЛАЙДЕРА -->
                  <div class="ray-main-promo">
                     <div class="slider-container" id="promo-slider">
                         <!-- СЛАЙД 1 (Ваша ссылка) -->
@@ -258,7 +261,6 @@
                     <!-- Навигационные точки -->
                     <div class="slider-dots" id="slider-dots-container"></div>
                  </div>
-                 <!-- КОНЕЦ НОВОЙ СТРУКТУРЫ -->
             </div>
 
             <div class="dashboard-card">
@@ -287,8 +289,28 @@
             <h1 style="font-size: 1.6em; margin-bottom: 25px;">Управление Каталогом Товаров</h1>
             <div class="dashboard-card">
                  <h2 style="font-size: 1.3em; margin: 0 0 15px 0;">Инструменты и Поиск</h2>
+                 <!-- Поле поиска, оставлено как заглушка -->
                  <input type="text" placeholder="Поиск по Артикулу, Названию..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
                  <a href="#" onclick="showPage('dashboard-view'); return false;" style="color: var(--color-link-blue); font-weight: 600;"> ← Назад на Главный Дашборд</a>
+            </div>
+            
+            <!-- WebView / Iframe для отображения внешнего контента -->
+            <div class="dashboard-card">
+                 <h2 style="font-size: 1.3em; margin: 0 0 15px 0;">Внешний Редактор / WebView</h2>
+                 <p style="color: #666;">Ниже показано, как можно встроить внешний сайт или инструмент (например, панель управления каталогом) через iframe (аналог WebView).</p>
+                 <div class="webview-container">
+                    <!-- 
+                        ВНИМАНИЕ: Многие сайты (например, Google, Facebook) запрещают встраивание 
+                        в iframe из соображений безопасности (X-Frame-Options). 
+                        Я использую нейтральный, безопасный для встраивания пример: 
+                        https://docs.microsoft.com/
+                    -->
+                    <iframe 
+                        src="https://docs.microsoft.com/ru-ru/windows/uwp/design/controls-and-patterns/web-view" 
+                        style="width: 100%; height: 100%; border: none;"
+                        title="WebView Example Content">
+                    </iframe>
+                 </div>
             </div>
         </div>
 
@@ -309,7 +331,7 @@
     const authOverlay = document.getElementById('auth-overlay');
     
     // ==========================================================
-    // НОВЫЙ КОД ДЛЯ СЛАЙДЕРА
+    // КОД ДЛЯ СЛАЙДЕРА
     // ==========================================================
     let currentSlide = 0;
     const sliderContainer = document.getElementById('promo-slider');
@@ -330,8 +352,8 @@
             if (index === 0) {
                 dot.classList.add('active-dot');
             }
+            // Добавляем обработчик клика для ручного переключения
             dot.addEventListener('click', () => {
-                // Сбрасываем таймер при ручном переключении
                 resetAutoSlide(); 
                 goToSlide(index);
             });
@@ -343,7 +365,7 @@
     function goToSlide(index) {
         currentSlide = index;
         if (sliderContainer) {
-             // Сдвигаем контейнер на (-индекс * 100%)
+             // Сдвигаем контейнер на (-индекс * 100%) по горизонтали
              sliderContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
         }
 
@@ -358,6 +380,7 @@
 
     // 3. Функции для автопрокрутки
     function autoSlide() {
+        // Переход к следующему слайду. % slides.length обеспечивает зацикливание
         currentSlide = (currentSlide + 1) % slides.length;
         goToSlide(currentSlide);
     }
@@ -368,12 +391,14 @@
     }
     
     function resetAutoSlide() {
+         // Сбрасываем текущий интервал и запускаем новый
          clearInterval(slideInterval);
          startAutoSlide();
     }
     
     // 4. Инициализация слайдера
     function initSlider() {
+        // Проверяем наличие всех элементов, прежде чем запускать логику
         if (slides.length > 0 && sliderContainer && dotsContainer) {
             createDots();
             startAutoSlide();
@@ -392,34 +417,34 @@
              authOverlay.style.display = 'none';
              mainInterface.style.display = 'flex';
              showPage('dashboard-view');
-             initSlider(); // <-- ЗАПУСК СЛАЙДЕРА ПОСЛЕ ВХОДА
+             initSlider(); // <-- ЗАПУСК СЛАЙДЕРА ПОСЛЕ ПОКАЗА ПАНЕЛИ
         }, 500);
     }
 
     // Функция 2: Переключение окон/разделов (привязана ко всем кнопкам навигации)
     function showPage(pageId) {
-        // Скрываем все разделы контента
+        // 1. Скрываем все разделы контента
         document.querySelectorAll('.content-view').forEach(view => {
             view.classList.remove('active');
         });
         
-        // Удаляем активный стиль со всех ссылок в меню
+        // 2. Удаляем активный стиль со всех ссылок в меню
         document.querySelectorAll('.link-block').forEach(link => link.classList.remove('active-nav'));
 
-        // Показываем нужный раздел
+        // 3. Показываем нужный раздел
         const targetView = document.getElementById(pageId);
         if (targetView) {
             targetView.classList.add('active');
         }
         
-        // Активируем соответствующую ссылку в меню (если она есть)
+        // 4. Активируем соответствующую ссылку в меню (если она есть)
         const navLink = document.getElementById(`nav-${pageId.replace('-view', '')}`);
         if (navLink) {
              navLink.classList.add('active-nav');
         }
     }
 
-    // Инициализация при открытии
+    // Инициализация при открытии страницы
     mainInterface.style.display = 'none';
     authOverlay.style.display = 'flex'; 
 
